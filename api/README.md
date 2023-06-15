@@ -6,9 +6,9 @@ This directory contains the Azuro API subgraph, which provides endpoints for acc
 
 ### Production
 
-Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>\
-Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>\
-Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v2>
+- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>\
+- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>\
+- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v2>
 
 ### Development
 
@@ -18,14 +18,14 @@ Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mum
 
 ## Running You Own Subgraph
 
-Currently, we do not support The Graph's decentralized network as we are using IPFS to store game information. However, we plan to remove the dependency on IPFS in future releases and provide support for decentralized networks. Until then, we recommend using our provided endpoints or deploying subgraphs to our hosted services.
+At present, support for The Graph's decentralized network is not provided due to the use of IPFS for game information storage. Future releases, however, are intended to eliminate this dependency on IPFS and incorporate support for decentralized networks. In the interim, the recommendation is to utilize the provided endpoints or deploy subgraphs to the hosted services.
 
 1. Install the graph-cli by running `npm install -g @graphprotocol/graph-cli`
 2. Install the required packages by running `npm ci`
-3. Edit the configuration file config/<NETWORK>.js (or create a new one) to support your smart contracts. This directory contains pre-configured addresses and start blocks of Azuro Protocol contracts. For more details, refer to [the documentation](https://thegraph.com/docs/en/developing/creating-a-subgraph/).
+3. Edit the configuration file `config/<NETWORK>.js` (or create a new one) to support your smart contracts. This directory contains pre-configured addresses and start blocks of Azuro Protocol contracts. For more details, refer to [the documentation](https://thegraph.com/docs/en/developing/creating-a-subgraph/).
 4. Update the `src/whitelists.ts` file to support your Liquidity Pools and Express Bets contracts.
 5. Run `CONFIG=<NETWORK> npm run generate` to create the `subgraph.yaml` file and perform code generation. Alternatively, you can use predefined tasks from the package.json file, such as npm run generate-gnosis-dev.
 6. Initialize the subgraph by running `graph create <SUBGRAPH_NAME> --node <NODE_URL> --deploy-key <DEPLOY_KEY>`.
 7. Deploy the subgraph by running `graph deploy <SUBGRAPH_NAME> --version-label <VERSION_NAME> --node <NODE_URL> --ipfs <IPFS_NODE_URL> --deploy-key <DEPLOY_KEY>`.
 
-For more detailed instructions, please refer to [the documentation](https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-hosted/).
+For more detailed instructions, please refer to [The Graph documentation](https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-hosted/).
