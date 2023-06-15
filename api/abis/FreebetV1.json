@@ -1,0 +1,1139 @@
+[
+  {
+    "type": "error",
+    "name": "AlreadyResolved",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BetExpired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DifferentArraysLength",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientContractBalance",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NonTransferable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotBetOwner",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OddsTooSmall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyMaintainer",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "WrongToken",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroDuration",
+    "inputs": []
+  },
+  {
+    "type": "event",
+    "name": "Approval",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "approved",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ApprovalForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "bool",
+        "name": "approved",
+        "internalType": "bool",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BettorWin",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "bettor",
+        "internalType": "address",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "azuroBetId",
+        "internalType": "uint256",
+        "indexed": false
+      },
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FreeBetMinted",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "receiver",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "id",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "tuple",
+        "name": "bet",
+        "internalType": "struct FreeBetV2.Bet",
+        "indexed": false,
+        "components": [
+          {
+            "type": "uint128",
+            "name": "amount",
+            "internalType": "uint128"
+          },
+          {
+            "type": "uint64",
+            "name": "minOdds",
+            "internalType": "uint64"
+          },
+          {
+            "type": "uint64",
+            "name": "durationTime",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FreeBetMintedBatch",
+    "inputs": [
+      {
+        "type": "address[]",
+        "name": "receivers",
+        "internalType": "address[]",
+        "indexed": false
+      },
+      {
+        "type": "uint256[]",
+        "name": "ids",
+        "internalType": "uint256[]",
+        "indexed": false
+      },
+      {
+        "type": "tuple[]",
+        "name": "bets",
+        "internalType": "struct FreeBetV2.Bet[]",
+        "indexed": false,
+        "components": [
+          {
+            "type": "uint128",
+            "name": "amount",
+            "internalType": "uint128"
+          },
+          {
+            "type": "uint64",
+            "name": "minOdds",
+            "internalType": "uint64"
+          },
+          {
+            "type": "uint64",
+            "name": "durationTime",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FreeBetRedeemed",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "bettor",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "id",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "azuroBetId",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FreeBetReissued",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "receiver",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "id",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "tuple",
+        "name": "bet",
+        "internalType": "struct FreeBetV2.Bet",
+        "indexed": false,
+        "components": [
+          {
+            "type": "uint128",
+            "name": "amount",
+            "internalType": "uint128"
+          },
+          {
+            "type": "uint64",
+            "name": "minOdds",
+            "internalType": "uint64"
+          },
+          {
+            "type": "uint64",
+            "name": "durationTime",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Initialized",
+    "inputs": [
+      {
+        "type": "uint8",
+        "name": "version",
+        "internalType": "uint8",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LpChanged",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "newLp",
+        "internalType": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MaintainerUpdated",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "maintainer",
+        "internalType": "address",
+        "indexed": false
+      },
+      {
+        "type": "bool",
+        "name": "active",
+        "internalType": "bool",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "previousOwner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "newOwner",
+        "internalType": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Transfer",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "contract ILP"
+      }
+    ],
+    "name": "LP",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "addReserve",
+    "inputs": [
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "addReserveNative",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "approve",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "freeBetId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      },
+      {
+        "type": "uint128",
+        "name": "payout",
+        "internalType": "uint128"
+      }
+    ],
+    "name": "azuroBets",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "balanceOf",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "baseURI",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "burnExpired",
+    "inputs": [
+      {
+        "type": "uint256[]",
+        "name": "ids",
+        "internalType": "uint256[]"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint64",
+        "name": "",
+        "internalType": "uint64"
+      }
+    ],
+    "name": "expirationTime",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      },
+      {
+        "type": "uint64",
+        "name": "minOdds",
+        "internalType": "uint64"
+      },
+      {
+        "type": "uint64",
+        "name": "durationTime",
+        "internalType": "uint64"
+      }
+    ],
+    "name": "freeBets",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "getApproved",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256[]",
+        "name": "",
+        "internalType": "uint256[]"
+      },
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "getExpiredUnburned",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "start",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "count",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "initialize",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "token_",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "isApprovedForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "lastTokenId",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "lockedReserve",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "maintainers",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "mint",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "tuple",
+        "name": "bet",
+        "internalType": "struct FreeBetV2.Bet",
+        "components": [
+          {
+            "type": "uint128",
+            "name": "amount",
+            "internalType": "uint128"
+          },
+          {
+            "type": "uint64",
+            "name": "minOdds",
+            "internalType": "uint64"
+          },
+          {
+            "type": "uint64",
+            "name": "durationTime",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "mintBatch",
+    "inputs": [
+      {
+        "type": "address[]",
+        "name": "receivers",
+        "internalType": "address[]"
+      },
+      {
+        "type": "tuple[]",
+        "name": "bets",
+        "internalType": "struct FreeBetV2.Bet[]",
+        "components": [
+          {
+            "type": "uint128",
+            "name": "amount",
+            "internalType": "uint128"
+          },
+          {
+            "type": "uint64",
+            "name": "minOdds",
+            "internalType": "uint64"
+          },
+          {
+            "type": "uint64",
+            "name": "durationTime",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "name",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "owner",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "ownerOf",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "redeem",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "id",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "conditionId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      },
+      {
+        "type": "uint64",
+        "name": "outcomeId",
+        "internalType": "uint64"
+      },
+      {
+        "type": "uint64",
+        "name": "deadline",
+        "internalType": "uint64"
+      },
+      {
+        "type": "uint64",
+        "name": "minOdds",
+        "internalType": "uint64"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "renounceOwnership",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "resolvePayout",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "azuroBetId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "safeTransferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "safeTransferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "bytes",
+        "name": "data",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setApprovalForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address"
+      },
+      {
+        "type": "bool",
+        "name": "approved",
+        "internalType": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setBaseURI",
+    "inputs": [
+      {
+        "type": "string",
+        "name": "uri",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setLp",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "lp",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "type": "bytes4",
+        "name": "interfaceId",
+        "internalType": "bytes4"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "symbol",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "token",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "tokenURI",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "transferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "newOwner",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "updateMaintainer",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "maintainer",
+        "internalType": "address"
+      },
+      {
+        "type": "bool",
+        "name": "active",
+        "internalType": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "withdrawPayout",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "azuroBetId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "withdrawPayoutNative",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "azuroBetId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "withdrawReserve",
+    "inputs": [
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "withdrawReserveNative",
+    "inputs": [
+      {
+        "type": "uint128",
+        "name": "amount",
+        "internalType": "uint128"
+      }
+    ]
+  },
+  {
+    "type": "receive",
+    "stateMutability": "payable"
+  }
+]

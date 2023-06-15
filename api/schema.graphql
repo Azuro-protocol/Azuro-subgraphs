@@ -1,0 +1,385 @@
+enum LiquidityPoolContractType {
+  V1
+  V2
+}
+
+type LiquidityPoolContract @entity {
+  id: ID!
+  chainId: Int!
+  chainName: String!
+  address: String!
+  cores: [CoreContract!]! @derivedFrom(field: "liquidityPool")
+  coreAddresses: [String!]
+  type: LiquidityPoolContractType!
+  token: String!
+  tokenDecimals: Int!
+  asset: String!
+  betsAmount: BigInt!
+  betsCount: BigInt!
+  wonBetsAmount: BigInt!
+  wonBetsCount: BigInt!
+  firstCalculatedBlockNumber: BigInt!
+  firstCalculatedBlockTimestamp: BigInt!
+  lastCalculatedBlockNumber: BigInt!
+  lastCalculatedBlockTimestamp: BigInt!
+  daysSinceDeployment: BigInt!
+  depositedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  withdrawTimeout: BigInt!
+  "all funds on Liquidity Pool"
+  rawTvl: BigInt!
+  tvl: BigDecimal!
+  "(betsAmount - wonBetsAmount) * Xprofit / (depositedAmount - withdrawnAmount) / daysSinceDeployment * 365"
+  rawApr: BigInt!
+  apr: BigDecimal!
+  nfts: [LiquidityPoolNft!]! @derivedFrom(field: "liquidityPool")
+}
+
+type LiquidityPoolNft @entity {
+  id: ID!
+  nftId: BigInt!
+  owner: String!
+  liquidityPool: LiquidityPoolContract!
+  rawDepositedAmount: BigInt!
+  depositedAmount: BigDecimal!
+  rawWithdrawnAmount: BigInt!
+  withdrawnAmount: BigDecimal!
+  isFullyWithdrawn: Boolean!
+  transactions: [LiquidityPoolTransaction!]! @derivedFrom(field: "nft")
+  createBlockNumber: BigInt!
+  createBlockTimestamp: BigInt!
+  withdrawTimeout: BigInt!
+}
+
+enum LiquidityPoolTransactionType {
+  Deposit
+  Withdrawal
+}
+
+type LiquidityPoolTransaction @entity {
+  id: ID!
+  account: String!
+  nft: LiquidityPoolNft!
+  type: LiquidityPoolTransactionType!
+  liquidityPool: LiquidityPoolContract!
+  rawAmount: BigInt!
+  amount: BigDecimal!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+type CoreContract @entity {
+  id: ID!
+  liquidityPool: LiquidityPoolContract!
+  address: String!
+  type: String!
+}
+
+type ExpressPrematchRelation @entity(immutable: true) {
+  "Express (core) contract address"
+  id: ID!
+  prematchAddress: String!
+}
+
+type AzuroBetContract @entity {
+  id: ID!
+  core: CoreContract!
+  address: String!
+}
+
+type FreebetContract @entity {
+  id: ID!
+  liquidityPool: LiquidityPoolContract!
+  address: String!
+  name: String!
+}
+
+#####
+
+type SportHub @entity {
+  id: ID!
+  name: String!
+  slug: String!
+  sports: [Sport!] @derivedFrom(field: "sporthub")
+}
+
+type Sport @entity {
+  id: ID!
+  sportId: BigInt!
+  name: String!
+  slug: String!
+  sporthub: SportHub!
+  countries: [Country!]! @derivedFrom(field: "sport")
+  games: [Game!]! @derivedFrom(field: "sport")
+}
+
+type Country @entity {
+  id: ID!
+  name: String!
+  slug: String!
+  sport: Sport!
+  leagues: [League!]! @derivedFrom(field: "country")
+  hasActiveLeagues: Boolean!
+  activeLeaguesEntityIds: [String!]
+  turnover: BigInt!
+}
+
+type League @entity {
+  id: ID!
+  name: String!
+  slug: String!
+  country: Country!
+  games: [Game!]! @derivedFrom(field: "league")
+  hasActiveGames: Boolean!
+  activeGamesEntityIds: [String!]
+  turnover: BigInt!
+}
+
+enum GameStatus {
+  Created
+  Resolved
+  Canceled
+  Paused
+}
+
+type Game @entity {
+  "LP Contract address + Game Id"
+  id: ID!
+  liquidityPool: LiquidityPoolContract!
+  gameId: BigInt!
+  title: String
+  slug: String
+  league: League!
+  sport: Sport!
+  status: GameStatus!
+  participants: [Participant!]! @derivedFrom(field: "game")
+  conditions: [Condition!]! @derivedFrom(field: "game")
+  hasActiveConditions: Boolean!
+  _activeConditionsEntityIds: [String!]
+  _resolvedConditionsEntityIds: [String!]
+  _canceledConditionsEntityIds: [String!]
+  _pausedConditionsEntityIds: [String!]
+  startsAt: BigInt!
+  ipfsHash: String!
+  provider: BigInt!
+  turnover: BigInt!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  shiftedBlockNumber: BigInt
+  shiftedBlockTimestamp: BigInt
+  shiftedTxHash: String
+  resolvedBlockNumber: BigInt
+  resolvedBlockTimestamp: BigInt
+  resolvedTxHash: String
+  _updatedAt: BigInt!
+}
+
+enum ConditionStatus {
+  Created
+  Resolved
+  Canceled
+  Paused
+}
+
+type Condition @entity {
+  "Core Contract address + Condition Id"
+  id: ID!
+  core: CoreContract!
+  coreAddress: String!
+  conditionId: BigInt!
+  game: Game!
+  outcomes: [Outcome!]! @derivedFrom(field: "condition")
+  outcomesIds: [BigInt!]
+  wonOutcome: Outcome
+  wonOutcomeId: BigInt
+  margin: BigInt!
+  reinforcement: BigInt!
+  status: ConditionStatus!
+  turnover: BigInt!
+  provider: BigInt!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  resolvedBlockNumber: BigInt
+  resolvedBlockTimestamp: BigInt
+  resolvedTxHash: String
+  internalStartsAt: BigInt
+  _updatedAt: BigInt!
+}
+
+type Outcome @entity {
+  "Condition entity Id (Core Contract address + Condition Id) + outcome Id"
+  id: ID!
+  core: CoreContract!
+  outcomeId: BigInt!
+  condition: Condition!
+  fund: BigInt!
+  rawCurrentOdds: BigInt!
+  currentOdds: BigDecimal!
+  sortOrder: Int!
+  _betsEntityIds: [String!]
+  selections: [Selection!]! @derivedFrom(field: "outcome")
+  _updatedAt: BigInt!
+}
+
+type Participant @entity(immutable: true) {
+  "Game entity Id (LP Contract address + Game Id) + participant sortOrder"
+  id: ID!
+  game: Game!
+  name: String!
+  image: String
+  sortOrder: Int!
+}
+
+enum BetStatus {
+  Accepted
+  Canceled
+  Resolved
+}
+
+enum BetResult {
+  Won
+  Lost
+}
+
+enum BetType {
+  Ordinar
+  Express
+}
+
+enum SelectionResult {
+  Won
+  Lost
+}
+
+type Bet @entity {
+  "Core contract address + Bet Id"
+  id: ID!
+  core: CoreContract!
+  type: BetType!
+  betId: BigInt!
+  bettor: String!
+  owner: String!
+  actor: String!
+  affiliate: String
+  _conditions: [Condition!]!
+  _conditionIds: [BigInt!]!
+  rawAmount: BigInt!
+  amount: BigDecimal!
+  _tokenDecimals: Int!
+  rawPotentialPayout: BigInt!
+  potentialPayout: BigDecimal!
+  rawPayout: BigInt
+  payout: BigDecimal
+  rawOdds: BigInt!
+  odds: BigDecimal!
+  _oddsDecimals: Int!
+  rawSettledOdds: BigInt
+  settledOdds: BigDecimal
+  "when the last game from all sub bets starts at + 2h"
+  approxSettledAt: BigInt!
+  selections: [Selection!]! @derivedFrom(field: "bet")
+  _games: [Game!]!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  resolvedBlockNumber: BigInt
+  resolvedBlockTimestamp: BigInt
+  resolvedTxHash: String
+  status: BetStatus!
+  result: BetResult
+  isRedeemable: Boolean!
+  isRedeemed: Boolean!
+  redeemedBlockNumber: BigInt
+  redeemedBlockTimestamp: BigInt
+  redeemedTxHash: String
+  _subBetsCount: Int!
+  _wonSubBetsCount: Int!
+  _lostSubBetsCount: Int!
+  _canceledSubBetsCount: Int!
+  _isFreebet: Boolean!
+  freebet: Freebet
+  _updatedAt: BigInt!
+}
+
+type Selection @entity {
+  id: ID!
+  bet: Bet!
+  rawOdds: BigInt!
+  odds: BigDecimal!
+  _oddsDecimals: Int!
+  result: SelectionResult
+  _outcomeId: BigInt!
+  outcome: Outcome!
+}
+
+enum FreebetStatus {
+  Created
+  Reissued
+  Redeemed
+  Withdrawn
+}
+
+type Freebet @entity {
+  "Freebet Contract address + Freebet Id"
+  id: ID!
+  owner: String!
+  freebetContractAddress: String!
+  freebetContractName: String!
+  freebet: FreebetContract!
+  azuroBetId: BigInt
+  core: CoreContract
+  freebetId: BigInt!
+  status: FreebetStatus!
+  expiresAt: BigInt!
+  amount: BigDecimal!
+  rawAmount: BigInt!
+  tokenDecimals: Int!
+  durationTime: BigInt!
+  rawMinOdds: BigInt!
+  minOdds: BigDecimal!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  burned: Boolean!
+  _updatedAt: BigInt!
+}
+
+enum EventName {
+  NewGame
+  GameShifted
+  BettorWin
+  ConditionCreated
+  ConditionResolved
+  ConditionShifted
+  ConditionStopped
+  NewBet
+  FreeBetMinted
+  FreeBetReissued
+  FreeBetRedeemed
+  FreeBetBettorWin
+  FreeBetTransfer
+  LiquidityAdded
+  LiquidityRemoved
+  LiquidityTransfer
+  AzuroBetTransfer
+}
+
+type Event @entity(immutable: true) {
+  id: ID!
+  contractAddress: String!
+  name: EventName!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+  transactionIndex: BigInt!
+  logIndex: BigInt!
+  sortOrder: BigInt!
+  betId: String
+  conditionId: String
+  gameId: String
+  freebetId: String
+  leafId: String
+}

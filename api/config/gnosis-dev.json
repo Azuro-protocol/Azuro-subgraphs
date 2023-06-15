@@ -1,0 +1,22 @@
+
+{
+  "network": "gnosis",
+  "corev1": {
+    "address": "0xB14a6ad58eD67fCF1769FcD7b9bc8671fB1B3a61",
+    "startBlock": 23592925
+  },
+  "freebetsv1": [{
+    "index": 1,
+    "address": "0xf58668479A65A09A01d58255191DF6Fbf114cf1e",
+    "startBlock": 24266711
+  }],
+  "factoryv1": {
+    "address": "0x6B2Bc6BBa13803bba9f229EB8e6e419195C37d85",
+    "startBlock": 26139099
+  },
+  "freebetsv2": [{
+    "index": 1,
+    "address": "0x7626BA5fc33357B7C6F711a25f1CF886c2FC4364",
+    "startBlock": 26139109
+  }]
+}
