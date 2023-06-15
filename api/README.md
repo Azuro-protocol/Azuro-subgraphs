@@ -1,0 +1,31 @@
+# Azuro-api
+
+This directory contains the Azuro API subgraph, which provides endpoints for accessing data on different networks. The API is compatible with various networks, including Arbitrum, Gnosis, and Polygon. You can find the endpoints for both production and development environments below.
+
+## Endpoints
+
+### Production
+
+Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>\
+Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>\
+Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v2>
+
+### Development
+
+Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-goerli-dev-v2>\
+Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-dev-v2>\
+Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-dev-v2>
+
+## Running You Own Subgraph
+
+Currently, we do not support The Graph's decentralized network as we are using IPFS to store game information. However, we plan to remove the dependency on IPFS in future releases and provide support for decentralized networks. Until then, we recommend using our provided endpoints or deploying subgraphs to our hosted services.
+
+1. Install the graph-cli by running `npm install -g @graphprotocol/graph-cli`
+2. Install the required packages by running `npm ci`
+3. Edit the configuration file config/<NETWORK>.js (or create a new one) to support your smart contracts. This directory contains pre-configured addresses and start blocks of Azuro Protocol contracts. For more details, refer to [the documentation](https://thegraph.com/docs/en/developing/creating-a-subgraph/).
+4. Update the `src/whitelists.ts` file to support your Liquidity Pools and Express Bets contracts.
+5. Run `CONFIG=<NETWORK> npm run generate` to create the `subgraph.yaml` file and perform code generation. Alternatively, you can use predefined tasks from the package.json file, such as npm run generate-gnosis-dev.
+6. Initialize the subgraph by running `graph create <SUBGRAPH_NAME> --node <NODE_URL> --deploy-key <DEPLOY_KEY>`.
+7. Deploy the subgraph by running `graph deploy <SUBGRAPH_NAME> --version-label <VERSION_NAME> --node <NODE_URL> --ipfs <IPFS_NODE_URL> --deploy-key <DEPLOY_KEY>`.
+
+For more detailed instructions, please refer to [the documentation](https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-hosted/).

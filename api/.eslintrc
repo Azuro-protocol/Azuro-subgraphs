@@ -1,0 +1,128 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
+  "extends": [
+    "airbnb-base",
+    "airbnb-typescript/base",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "simple-import-sort"
+  ],
+  "globals": {
+    "i32": true,
+    "u8": true,
+    "i64": true,
+    "f64": true
+  },
+  "rules": {
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "BigInt": false
+        }
+      }
+    ],
+    "function-call-argument-newline": ["error", "consistent"],
+    "prefer-const": "off",
+    "prefer-destructuring": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/no-empty-function": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/semi": ["error", "never"],
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": ["return", "if", "try"]
+      }
+    ],
+
+    "eol-last": ["error", "always"],
+    "curly": ["error"],
+    "quotes": ["error", "single"],
+    "@typescript-eslint/brace-style": ["error", "stroustrup"],
+    "brace-style": ["error", "stroustrup"],
+    "key-spacing": ["error", { "beforeColon": false }],
+    "arrow-spacing": "error",
+    "space-infix-ops": "error",
+    "space-before-blocks": "error",
+    "no-multi-spaces": "warn",
+    "no-trailing-spaces": "warn",
+    "max-len": [ "error", { "code": 160 } ],
+    "object-curly-newline": ["error", { "ImportDeclaration": { "multiline": true, "minProperties": 5 }}],
+    "object-property-newline": "error",
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2
+      }
+    ],
+    "comma-spacing": "warn",
+    "keyword-spacing": "error",
+    "import/first": 0,
+    "import/extensions": 0,
+    "import/no-unresolved": 0,
+    "import/no-dynamic-require": 0,
+    "import/prefer-default-export": 0,
+    "import/no-webpack-loader-syntax": 0,
+    "import/no-named-as-default-member": 1,
+    "import/no-extraneous-dependencies": 0,
+    "import/no-anonymous-default-export": 0,
+    "import/newline-after-import": [
+      "error",
+      {
+        "count": 2
+      }
+    ],
+    // typescript
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-for-in-array": "error",
+    "@typescript-eslint/await-thenable": "warn",
+    "@typescript-eslint/consistent-type-imports": "off",
+    "@typescript-eslint/type-annotation-spacing": "error",
+    "@typescript-eslint/indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "@typescript-eslint/ban-ts-comment": "off",
+    "array-bracket-spacing": ["error", "never"],
+    "comma-dangle": ["error", "always-multiline"],
+    "func-style": "off",
+    "guard-for-in": 0,
+    "no-underscore-dangle": "off",
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "lines-between-class-members": ["error", "always"],
+    "new-cap": "error",
+    "no-await-in-loop": 0,
+    "no-continue": 0,
+    "no-magic-numbers": "off",
+    "no-multi-assign": "error",
+    "no-param-reassign": 0,
+    "no-plusplus": 0,
+    "no-promise-executor-return": 0,
+    "no-restricted-syntax": 0,
+    "no-undef": "error",
+    "no-unused-vars": "error",
+    "no-use-before-define": "error",
+    "one-var": ["error", "never"],
+    "padded-blocks": 0,
+    "quote-props": ["error", "as-needed"],
+    "semi": ["error", "never"],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
+  }
+}
