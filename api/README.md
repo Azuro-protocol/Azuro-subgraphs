@@ -6,15 +6,15 @@ This directory contains the Azuro API subgraph, which provides endpoints for acc
 
 ### Production
 
-- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>\
-- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>\
+- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>
+- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>
 - Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v2>
 
 ### Development
 
-Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-goerli-dev-v2>\
-Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-dev-v2>\
-Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-dev-v2>
+- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-goerli-dev-v2>
+- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-dev-v2>
+- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-dev-v2>
 
 ## Running You Own Subgraph
 
