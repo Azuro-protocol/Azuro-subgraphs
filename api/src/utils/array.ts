@@ -8,6 +8,14 @@ export function removeItem<T>(arr: Array<T>, value: T): Array<T> {
   return arr
 }
 
+export function addUniqueItem<T>(arr: Array<T>, value: T): Array<T> {
+  if (arr.indexOf(value) === -1) {
+    return arr.concat([value])
+  }
+
+  return arr
+}
+
 export function addLeadZerosOrSlice(input: string, digits: i32): string {
   let arr = input.split('').reverse()
 

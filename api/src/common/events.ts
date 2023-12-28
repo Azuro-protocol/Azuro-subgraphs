@@ -12,6 +12,8 @@ export function createEvent(
   transactionIndex: BigInt,
   logIndex: BigInt,
   block: ethereum.Block,
+  gasPrice: BigInt,
+  gasUsed: BigInt | null,
   paramName: string | null = null,
   paramValue: string | null = null,
 ): Event {
@@ -31,6 +33,8 @@ export function createEvent(
 
   eventEntity.blockNumber = block.number
   eventEntity.blockTimestamp = block.timestamp
+  eventEntity.gasPrice = gasPrice
+  eventEntity.gasUsed = gasUsed
 
   if (paramName && paramValue) {
     eventEntity.set(paramName, Value.fromString(paramValue))

@@ -2,21 +2,22 @@ import { Address, BigInt, ethereum, log } from '@graphprotocol/graph-ts'
 
 import { Bet, Freebet, FreebetContract, LiquidityPoolContract } from '../../generated/schema'
 import {
+  BASES_VERSIONS,
   FREEBET_STATUS_CREATED,
   FREEBET_STATUS_REDEEMED,
   FREEBET_STATUS_REISSUED,
   FREEBET_STATUS_WITHDRAWN,
-  V1_BASE,
-  V2_BASE,
 } from '../constants'
 import { toDecimal } from '../utils/math'
 import { getBetEntityId, getFreebetEntityId } from '../utils/schema'
 
 
-export function createFreebetContract(
+export function createFreebetContractEntity(
   freebetContractAddress: string,
   liquidityPoolAddress: string,
-  freebetContractName: string,
+  freebetContractName: string | null,
+  freebetContractAffiliate: string | null,
+  freebetContractManager: string | null,
 ): FreebetContract | null {
   const freebetContractEntity = new FreebetContract(freebetContractAddress)
 
@@ -33,17 +34,30 @@ export function createFreebetContract(
 
   freebetContractEntity.liquidityPool = liquidityPoolContractEntity.id
   freebetContractEntity.address = freebetContractAddress
-  freebetContractEntity.name = freebetContractName
+
+  if (freebetContractName !== null) {
+    freebetContractEntity.name = freebetContractName
+  }
+
+  if (freebetContractAffiliate !== null) {
+    freebetContractEntity.affiliate = freebetContractAffiliate
+  }
+
+  if (freebetContractManager !== null) {
+    freebetContractEntity.manager = freebetContractManager
+  }
+
   freebetContractEntity.save()
 
   return freebetContractEntity
 }
 
 export function createFreebet(
-  isV2: boolean,
+  version: string,
   freebetContractEntityId: string,
   freebetContractAddress: string,
-  freebetContractName: string,
+  freebetContractName: string | null,
+  freebetContractAffiliate: string | null,
   freebetId: BigInt,
   owner: string,
   amount: BigInt,
@@ -51,6 +65,8 @@ export function createFreebet(
   minOdds: BigInt,
   durationTime: BigInt,
   txHash: string,
+  coreAddress: string | null,
+  azuroBetId: BigInt | null,
   createBlock: ethereum.Block,
 ): Freebet {
   const freebetEntityId = getFreebetEntityId(freebetContractAddress, freebetId.toString())
@@ -59,17 +75,34 @@ export function createFreebet(
 
   freebetEntity.freebet = freebetContractEntityId
   freebetEntity.freebetContractAddress = freebetContractAddress
-  freebetEntity.freebetContractName = freebetContractName
+
+  if (freebetContractName !== null) {
+    freebetEntity.freebetContractName = freebetContractName
+  }
+
   freebetEntity.freebetId = freebetId
+
+  if (freebetContractAffiliate !== null) {
+    freebetEntity.freebetContractAffiliate = freebetContractAffiliate
+  }
+
   freebetEntity.owner = owner
 
-  freebetEntity.status = FREEBET_STATUS_CREATED.toString()
+  if (coreAddress !== null && azuroBetId !== null) {
+    freebetEntity.azuroBetId = azuroBetId
+    freebetEntity.status = FREEBET_STATUS_REDEEMED.toString()
+    freebetEntity.core = coreAddress
+  }
+  else {
+    freebetEntity.status = FREEBET_STATUS_CREATED.toString()
+  }
 
   freebetEntity.rawAmount = amount
   freebetEntity.amount = toDecimal(freebetEntity.rawAmount, tokenDecimals)
   freebetEntity.tokenDecimals = tokenDecimals
   freebetEntity.rawMinOdds = minOdds
-  freebetEntity.minOdds = toDecimal(freebetEntity.rawMinOdds, isV2 ? V2_BASE : V1_BASE)
+
+  freebetEntity.minOdds = toDecimal(freebetEntity.rawMinOdds, BASES_VERSIONS.mustGetEntry(version).value)
   freebetEntity.durationTime = durationTime
   freebetEntity.expiresAt = freebetEntity.durationTime.plus(createBlock.timestamp)
 
@@ -78,6 +111,7 @@ export function createFreebet(
   freebetEntity.createdBlockNumber = createBlock.number
   freebetEntity.createdBlockTimestamp = createBlock.timestamp
   freebetEntity.burned = false
+  freebetEntity.isResolved = false
 
   freebetEntity._updatedAt = createBlock.timestamp
 
@@ -162,17 +196,11 @@ export function withdrawFreebet(freebetEntityId: string, block: ethereum.Block):
 export function transferFreebet(
   freebetContractAddress: string,
   tokenId: BigInt,
-  from: Address,
   to: Address,
   block: ethereum.Block,
 ): Freebet | null {
-  // create nft
-  if (from.equals(Address.zero())) {
-    return null
-  }
 
   const freebetEntityId = getFreebetEntityId(freebetContractAddress, tokenId.toString())
-
   const freebetEntity = Freebet.load(freebetEntityId)
 
   // TODO remove later
@@ -182,13 +210,7 @@ export function transferFreebet(
     return null
   }
 
-  // burn nft
-  if (to.equals(Address.zero())) {
-    freebetEntity.burned = true
-  }
-  else {
-    freebetEntity.owner = to.toHexString()
-  }
+  freebetEntity.owner = to.toHexString()
 
   freebetEntity._updatedAt = block.timestamp
   freebetEntity.save()
@@ -196,7 +218,7 @@ export function transferFreebet(
   const coreAddress = freebetEntity.core
   const azuroBetId = freebetEntity.azuroBetId
 
-  if (to.notEqual(Address.zero()) && coreAddress !== null && azuroBetId !== null) {
+  if (coreAddress !== null && azuroBetId !== null) {
     const betEntityId = getBetEntityId(coreAddress, azuroBetId.toString())
     const betEntity = Bet.load(betEntityId)
 
@@ -212,10 +234,34 @@ export function transferFreebet(
     betEntity.save()
   }
 
-  if (to.equals(Address.zero())) {
-    // do not create freebet transfer event
+  return freebetEntity
+}
+
+export function resolveFreebet(
+  freebetContractAddress: string,
+  tokenId: BigInt,
+  burned: boolean,
+  block: ethereum.Block,
+): Freebet | null {
+
+  const freebetEntityId = getFreebetEntityId(freebetContractAddress, tokenId.toString())
+  const freebetEntity = Freebet.load(freebetEntityId)
+
+  // TODO remove later
+  if (!freebetEntity) {
+    log.error('resolveFreebet freebetEntity not found. freebetEntityId = {}', [freebetEntityId])
+
     return null
   }
+
+  freebetEntity.isResolved = true
+
+  if (burned) {
+    freebetEntity.burned = true
+  }
+
+  freebetEntity._updatedAt = block.timestamp
+  freebetEntity.save()
 
   return freebetEntity
 }

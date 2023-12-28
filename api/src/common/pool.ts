@@ -1,4 +1,5 @@
 import {
+  Address,
   BigDecimal, BigInt, bigInt, dataSource, ethereum, log,
 } from '@graphprotocol/graph-ts'
 
@@ -11,6 +12,7 @@ import {
   X_PROFIT,
   X_PROFIT_DIVIDER,
 } from '../constants'
+import { addUniqueItem } from '../utils/array'
 import { toDecimal } from '../utils/math'
 import { getLiquidityPoolNftEntityId } from '../utils/schema'
 import { daysBetweenTimestamps } from '../utils/time'
@@ -59,7 +61,7 @@ function updatePoolOnCommonEvents(
 }
 
 export function createPoolEntity(
-  isV2: boolean,
+  version: string,
   coreAddress: string,
   liquidityPoolAddress: string,
   tokenAddress: string,
@@ -71,7 +73,7 @@ export function createPoolEntity(
   liquidityPoolContractEntity.coreAddresses = [coreAddress]
   liquidityPoolContractEntity.token = tokenAddress
 
-  liquidityPoolContractEntity.type = isV2 ? 'V2' : 'V1'
+  liquidityPoolContractEntity.type = version
 
   const network = dataSource.network()
 
@@ -123,6 +125,9 @@ export function createPoolEntity(
 
   liquidityPoolContractEntity.withdrawTimeout = BigInt.zero()
 
+  liquidityPoolContractEntity.depositedWithStakingAmount = BigInt.zero()
+  liquidityPoolContractEntity.withdrawnWithStakingAmount = BigInt.zero()
+
   liquidityPoolContractEntity.save()
 
   return liquidityPoolContractEntity
@@ -149,6 +154,10 @@ export function depositLiquidity(
 
   liquidityPoolContractEntity.depositedAmount = liquidityPoolContractEntity.depositedAmount.plus(amount)
 
+  if (liquidityPoolContractEntity.liquidityManager) {
+    liquidityPoolContractEntity.depositedWithStakingAmount = liquidityPoolContractEntity.depositedWithStakingAmount.plus(amount)
+  }
+
   updatePoolOnCommonEvents(liquidityPoolContractEntity, block)
 
   liquidityPoolContractEntity.save()
@@ -158,6 +167,7 @@ export function depositLiquidity(
 
   liquidityPoolNftEntity.nftId = leaf
   liquidityPoolNftEntity.owner = account
+  liquidityPoolNftEntity.historicalOwners = [account]
   liquidityPoolNftEntity.liquidityPool = liquidityPoolContractEntity.id
 
   liquidityPoolNftEntity.rawDepositedAmount = amount
@@ -209,6 +219,10 @@ export function withdrawLiquidity(
   }
 
   liquidityPoolContractEntity.withdrawnAmount = liquidityPoolContractEntity.withdrawnAmount.plus(amount)
+
+  if (liquidityPoolContractEntity.liquidityManager) {
+    liquidityPoolContractEntity.withdrawnWithStakingAmount = liquidityPoolContractEntity.withdrawnWithStakingAmount.plus(amount)
+  }
 
   updatePoolOnCommonEvents(liquidityPoolContractEntity, block)
 
@@ -267,6 +281,11 @@ export function transferLiquidity(liquidityPoolAddress: string, leaf: BigInt, to
   }
 
   liquidityPoolNftEntity.owner = to
+
+  if (Address.fromString(to).notEqual(Address.zero())) {
+    liquidityPoolNftEntity.historicalOwners = addUniqueItem(liquidityPoolNftEntity.historicalOwners, to)
+  }
+
   liquidityPoolNftEntity.save()
 
   return liquidityPoolNftEntity
@@ -317,6 +336,27 @@ export function countConditionResolved(
   liquidityPoolContractEntity.wonBetsCount = liquidityPoolContractEntity.wonBetsCount.plus(BigInt.fromString('1'))
 
   updatePoolOnCommonEvents(liquidityPoolContractEntity, block)
+
+  liquidityPoolContractEntity.save()
+
+  return liquidityPoolContractEntity
+}
+
+export function updateLiquidityManager(
+  liquidityPoolAddress: string,
+  liquidityManagerAddress: string | null,
+): LiquidityPoolContract | null {
+  const liquidityPoolContractEntity = LiquidityPoolContract.load(liquidityPoolAddress)
+
+  if (!liquidityPoolContractEntity) {
+    log.error('updateLiquidityManager liquidityPoolContractEntity not found. liquidityPoolAddress = {}', [
+      liquidityPoolAddress,
+    ])
+
+    return null
+  }
+
+  liquidityPoolContractEntity.liquidityManager = liquidityManagerAddress
 
   liquidityPoolContractEntity.save()
 

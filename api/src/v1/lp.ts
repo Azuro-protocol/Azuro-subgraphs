@@ -14,7 +14,7 @@ import {
 import { bettorWin, createBet } from '../common/bets'
 import { createEvent } from '../common/events'
 import { changeWithdrawalTimeout, depositLiquidity, transferLiquidity, withdrawLiquidity } from '../common/pool'
-import { BET_TYPE_ORDINAR } from '../constants'
+import { BET_TYPE_ORDINAR, VERSION_V1 } from '../constants'
 import { getConditionEntityId, getOutcomeEntityId } from '../utils/schema'
 
 
@@ -30,6 +30,8 @@ export function handleNewBet(event: NewBet): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'betId',
     event.params.betId.toString(),
   )
@@ -48,7 +50,7 @@ export function handleNewBet(event: NewBet): void {
   const outcomeEntity = Outcome.load(outcomeEntityId)!
 
   createBet(
-    false,
+    VERSION_V1,
     BET_TYPE_ORDINAR.toString(),
     [conditionEntity],
     [outcomeEntity],
@@ -78,11 +80,19 @@ export function handleBetterWin(event: BetterWin): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'betId',
     event.params.tokenId.toString(),
   )
 
-  bettorWin(coreAddress, event.params.tokenId, event.params.amount, event.transaction.hash.toHexString(), event.block)
+  bettorWin(
+    coreAddress,
+    event.params.tokenId,
+    event.params.amount,
+    event.transaction.hash.toHexString(),
+    event.block,
+  )
 }
 
 export function handleLiquidityAdded(event: LiquidityAdded): void {
@@ -93,7 +103,9 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
     event.params.leaf.toString(),
   )
 
@@ -117,6 +129,8 @@ export function handleOldLiquidityRemoved(event: LiquidityRemoved1): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
   )
 
   let isFullyWithdrawn = false
@@ -147,7 +161,9 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
     event.params.leaf.toString(),
   )
 
@@ -183,7 +199,9 @@ export function handleTransfer(event: Transfer): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
     event.params.tokenId.toString(),
   )
 

@@ -1,4 +1,4 @@
-export const LP_V2_WHITELIST = [
+export const LP_WHITELIST = [
   // gnosis xdai dev
   '0xe068bf88317fa2eb3eaecbfe1e486d8b2dde7761',
   // mumbai usdc dev
@@ -15,19 +15,25 @@ export const LP_V2_WHITELIST = [
   '0x482e419711e63d0e49cbdc696858ef1e4764771e',
   // arbitrum one usdt prod
   '0x20513ba6a4717c67e14291331bc99dd2ace90038',
-]
-
-export const EXPRESS_WHITELIST = [
-  // gnosis dev
-  '0xd3ac70b5326c201c8527da6999d9a0c74f7a1adc',
-  // mumbai dev
-  '0xa8951593abd2b28f142238a2128a2f4301464eaa',
-  // gnosis prod
-  '0x4ee3923484dfdc7ea2f1c558c2c820a97a727636',
-  // polygon prod
-  '0xbb13f8981cefd19ddc5338f0f1e11de45e8a11ca',
-  // arbitrum goerli dev
-  '0xecbfd2e4aafab41e8e5f8ee429d982a7a6a64af8',
-  // arbitrum one prod
-  '0x11470095252a6fe41c8ee6f7628ffb9298a1051c',
+  // linea goerli usdt dev / linea usdt prod
+  '0xc365224ef4fa75d56a280c5a3925cadbf7bd8eee',
+  // v2.8.7
+  // gnosis xdai dev
+  '0x7f227c55a78d6fcdc6aad982059e43075a282d38',
+  // mumbai usdt dev
+  '0x47c81b04a55346e724fdc3fec8e0628e8a1f11fc',
+  // arbitrum goerli usdt dev
+  '0x4ac2f9cbfeb932cc5c10f6701dc5a5f157cf5246',
+  // v2.9.0
+  // gnosis xdai dev
+  '0x1b31ee571db0dde82c4734854b8adbb87b100c44',
+  // v2.10.0
+  // gnosis xdai dev
+  '0x4e5bbe3e1f559c8010b516c603b619a932de3df4',
+  // mumbai usdt dev
+  '0xe511677660402c9e1741510b811906e5e905f003',
+  // arbitrum goerli usdt dev
+  '0x02a88e08142b262cc66c81977d8fbe86afe90c58',
+  // mumbai azusd prod
+  '0xa39e988b357122d9ba75c0038e625a5ab9363f54',
 ]

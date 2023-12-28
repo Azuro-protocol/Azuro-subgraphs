@@ -33,12 +33,16 @@ type LiquidityPoolContract @entity {
   rawApr: BigInt!
   apr: BigDecimal!
   nfts: [LiquidityPoolNft!]! @derivedFrom(field: "liquidityPool")
+  liquidityManager: String
+  depositedWithStakingAmount: BigInt!
+  withdrawnWithStakingAmount: BigInt!
 }
 
 type LiquidityPoolNft @entity {
   id: ID!
   nftId: BigInt!
   owner: String!
+  historicalOwners: [String!]!
   liquidityPool: LiquidityPoolContract!
   rawDepositedAmount: BigInt!
   depositedAmount: BigDecimal!
@@ -92,7 +96,9 @@ type FreebetContract @entity {
   id: ID!
   liquidityPool: LiquidityPoolContract!
   address: String!
-  name: String!
+  name: String
+  affiliate: String
+  manager: String
 }
 
 #####
@@ -161,7 +167,6 @@ type Game @entity {
   _canceledConditionsEntityIds: [String!]
   _pausedConditionsEntityIds: [String!]
   startsAt: BigInt!
-  ipfsHash: String!
   provider: BigInt!
   turnover: BigInt!
   createdBlockNumber: BigInt!
@@ -192,8 +197,8 @@ type Condition @entity {
   game: Game!
   outcomes: [Outcome!]! @derivedFrom(field: "condition")
   outcomesIds: [BigInt!]
-  wonOutcome: Outcome
-  wonOutcomeId: BigInt
+  wonOutcomes: [Outcome!]
+  wonOutcomeIds: [BigInt!]
   margin: BigInt!
   reinforcement: BigInt!
   status: ConditionStatus!
@@ -206,7 +211,9 @@ type Condition @entity {
   resolvedBlockTimestamp: BigInt
   resolvedTxHash: String
   internalStartsAt: BigInt
+  isExpressForbidden: Boolean!
   _updatedAt: BigInt!
+  _winningOutcomesCount: Int!
 }
 
 type Outcome @entity {
@@ -327,7 +334,8 @@ type Freebet @entity {
   id: ID!
   owner: String!
   freebetContractAddress: String!
-  freebetContractName: String!
+  freebetContractName: String
+  freebetContractAffiliate: String
   freebet: FreebetContract!
   azuroBetId: BigInt
   core: CoreContract
@@ -343,6 +351,7 @@ type Freebet @entity {
   createdBlockNumber: BigInt!
   createdBlockTimestamp: BigInt!
   createdTxHash: String!
+  isResolved: Boolean!
   burned: Boolean!
   _updatedAt: BigInt!
 }
@@ -356,6 +365,8 @@ enum EventName {
   ConditionShifted
   ConditionStopped
   NewBet
+  NewLiveBet
+  BetSettled
   FreeBetMinted
   FreeBetReissued
   FreeBetRedeemed
@@ -365,6 +376,8 @@ enum EventName {
   LiquidityRemoved
   LiquidityTransfer
   AzuroBetTransfer
+  MarginChanged
+  ReinforcementChanged
 }
 
 type Event @entity(immutable: true) {
@@ -381,5 +394,101 @@ type Event @entity(immutable: true) {
   conditionId: String
   gameId: String
   freebetId: String
-  leafId: String
+  depositId: String
+  gasPrice: BigInt!
+  gasUsed: BigInt
+}
+
+type LiveCondition @entity {
+  "Core Contract address + Condition Id"
+  id: ID!
+  core: CoreContract!
+  coreAddress: String!
+  conditionId: BigInt!
+  gameId: BigInt!
+  outcomes: [LiveOutcome!]! @derivedFrom(field: "condition")
+  outcomesIds: [BigInt!]
+  wonOutcomes: [LiveOutcome!]
+  wonOutcomeIds: [BigInt!]
+  status: ConditionStatus!
+  turnover: BigInt!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  resolvedBlockNumber: BigInt
+  resolvedBlockTimestamp: BigInt
+  resolvedTxHash: String
+  _updatedAt: BigInt!
+  _winningOutcomesCount: Int!
+}
+
+type LiveBet @entity {
+  "Core contract address + Bet Id"
+  id: ID!
+  core: CoreContract!
+  betId: BigInt!
+  bettor: String!
+  owner: String!
+  actor: String!
+  affiliate: String
+  _conditions: [LiveCondition!]!
+  _conditionIds: [BigInt!]!
+  rawAmount: BigInt!
+  amount: BigDecimal!
+  _tokenDecimals: Int!
+  rawPotentialPayout: BigInt!
+  potentialPayout: BigDecimal!
+  rawPayout: BigInt
+  payout: BigDecimal
+  rawPayoutLimit: BigInt!
+  payoutLimit: BigDecimal!
+  rawOdds: BigInt!
+  odds: BigDecimal!
+  _oddsDecimals: Int!
+  rawSettledOdds: BigInt
+  settledOdds: BigDecimal
+  "when the last game from all sub bets starts at + 2h"
+  selections: [LiveSelection!]! @derivedFrom(field: "bet")
+  _gamesIds: [String!]!
+  createdBlockNumber: BigInt!
+  createdBlockTimestamp: BigInt!
+  createdTxHash: String!
+  resolvedBlockNumber: BigInt
+  resolvedBlockTimestamp: BigInt
+  resolvedTxHash: String
+  status: BetStatus!
+  result: BetResult
+  isRedeemable: Boolean!
+  isRedeemed: Boolean!
+  redeemedBlockNumber: BigInt
+  redeemedBlockTimestamp: BigInt
+  redeemedTxHash: String
+  _subBetsCount: Int!
+  _wonSubBetsCount: Int!
+  _lostSubBetsCount: Int!
+  _canceledSubBetsCount: Int!
+  _updatedAt: BigInt!
+}
+
+type LiveSelection @entity {
+  id: ID!
+  bet: LiveBet!
+  rawOdds: BigInt!
+  odds: BigDecimal!
+  _oddsDecimals: Int!
+  result: SelectionResult
+  _outcomeId: BigInt!
+  outcome: LiveOutcome!
+}
+
+type LiveOutcome @entity {
+  "Condition entity Id (Core Contract address + Condition Id) + outcome Id"
+  id: ID!
+  core: CoreContract!
+  outcomeId: BigInt!
+  condition: LiveCondition!
+  sortOrder: Int!
+  _betsEntityIds: [String!]
+  selections: [LiveSelection!]! @derivedFrom(field: "outcome")
+  _updatedAt: BigInt!
 }

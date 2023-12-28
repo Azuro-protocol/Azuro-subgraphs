@@ -1,8 +1,12 @@
 
 {
   "network": "arbitrum-one",
-  "factoryv1": {
+  "factoryv2": {
     "address": "0x752735c1a93fe359E7BAC65f9981E7796e1039Ef",
     "startBlock": 98354147
+  },
+  "freebetFactoryv3": {
+    "address": "0x2102be67DFFeBb3f0eC5a02693F31d2C86C26D1e",
+    "startBlock": 135515511
   }
 }

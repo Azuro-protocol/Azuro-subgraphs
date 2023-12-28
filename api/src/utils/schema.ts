@@ -1,5 +1,12 @@
+import { BigInt } from '@graphprotocol/graph-ts'
+
+
 export function getEventEntityId(eventName: string, txHash: string, logIndex: string): string {
   return eventName.concat('_').concat(txHash.concat('_').concat(logIndex))
+}
+
+export function getLeagueEntityId(sportId: BigInt, countryName: string, leagueName: string): string {
+  return sportId.toString().concat('_').concat(countryName.concat('_').concat(leagueName))
 }
 
 export function getGameEntityId(liquidityPoolAddress: string, gameId: string): string {

@@ -22,6 +22,11 @@
   },
   {
     "inputs": [],
+    "name": "DepositDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "GameAlreadyCanceled",
     "type": "error"
   },
@@ -133,6 +138,11 @@
   },
   {
     "inputs": [],
+    "name": "SmallDonation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "UnknownCore",
     "type": "error"
   },
@@ -146,25 +156,6 @@
     ],
     "name": "WithdrawalTimeout",
     "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "affiliate",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "AffiliateRewarded",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -380,7 +371,7 @@
       {
         "indexed": true,
         "internalType": "uint48",
-        "name": "leaf",
+        "name": "depositId",
         "type": "uint48"
       },
       {
@@ -405,7 +396,45 @@
       {
         "indexed": true,
         "internalType": "uint48",
-        "name": "leaf",
+        "name": "depositId",
+        "type": "uint48"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "LiquidityDonated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newLiquidityManager",
+        "type": "address"
+      }
+    ],
+    "name": "LiquidityManagerChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint48",
+        "name": "depositId",
         "type": "uint48"
       },
       {
@@ -461,6 +490,30 @@
       },
       {
         "indexed": false,
+        "internalType": "uint64",
+        "name": "startsAt",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "NewGame",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "gameId",
+        "type": "uint256"
+      },
+      {
         "internalType": "bytes32",
         "name": "ipfsHash",
         "type": "bytes32"
@@ -574,7 +627,7 @@
         "type": "uint64"
       }
     ],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -596,18 +649,22 @@
         "internalType": "uint128",
         "name": "amount",
         "type": "uint128"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
       }
     ],
     "name": "addLiquidity",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint48",
+        "name": "depositId",
+        "type": "uint48"
+      }
+    ],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "addLiquidityNative",
-    "outputs": [],
-    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -629,18 +686,12 @@
       },
       {
         "internalType": "uint48",
-        "name": "leaf",
+        "name": "depositId",
         "type": "uint48"
       }
     ],
     "name": "addReserve",
-    "outputs": [
-      {
-        "internalType": "uint128",
-        "name": "affiliatesReward",
-        "type": "uint128"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -706,6 +757,11 @@
             "type": "address"
           },
           {
+            "internalType": "uint64",
+            "name": "minOdds",
+            "type": "uint64"
+          },
+          {
             "internalType": "bytes",
             "name": "data",
             "type": "bytes"
@@ -757,6 +813,11 @@
             "type": "address"
           },
           {
+            "internalType": "uint64",
+            "name": "minOdds",
+            "type": "uint64"
+          },
+          {
             "internalType": "bytes",
             "name": "data",
             "type": "bytes"
@@ -776,47 +837,6 @@
       }
     ],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "core",
-        "type": "address"
-      },
-      {
-        "internalType": "uint64",
-        "name": "expiresAt",
-        "type": "uint64"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "affiliate",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "data",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IBet.BetData",
-        "name": "betData",
-        "type": "tuple"
-      }
-    ],
-    "name": "betNative",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -872,6 +892,19 @@
       }
     ],
     "name": "changeFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newLiquidityManager",
+        "type": "address"
+      }
+    ],
+    "name": "changeLiquidityManager",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -970,37 +1003,13 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "core",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "claimAffiliateReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "claimedAmount",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "claimReward",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint128",
         "name": "claimedAmount",
-        "type": "uint256"
+        "type": "uint128"
       }
     ],
     "stateMutability": "nonpayable",
@@ -1014,25 +1023,6 @@
         "internalType": "uint64",
         "name": "",
         "type": "uint64"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "coreAffRewards",
-    "outputs": [
-      {
-        "internalType": "uint128",
-        "name": "",
-        "type": "uint128"
       }
     ],
     "stateMutability": "view",
@@ -1080,14 +1070,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes32",
-        "name": "ipfsHash",
-        "type": "bytes32"
-      },
-      {
         "internalType": "uint64",
         "name": "startsAt",
         "type": "uint64"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
       }
     ],
     "name": "createGame",
@@ -1106,6 +1096,24 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint48",
+        "name": "depositId",
+        "type": "uint48"
+      }
+    ],
+    "name": "donateLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1152,7 +1160,7 @@
     "outputs": [
       {
         "internalType": "bytes32",
-        "name": "ipfsHash",
+        "name": "unusedVariable",
         "type": "bytes32"
       },
       {
@@ -1219,11 +1227,11 @@
   },
   {
     "inputs": [],
-    "name": "getLeaf",
+    "name": "getLastDepositId",
     "outputs": [
       {
         "internalType": "uint48",
-        "name": "leaf",
+        "name": "depositId",
         "type": "uint48"
       }
     ],
@@ -1293,11 +1301,6 @@
         "internalType": "uint64",
         "name": "dataProviderFee",
         "type": "uint64"
-      },
-      {
-        "internalType": "uint64",
-        "name": "affiliateFee",
-        "type": "uint64"
       }
     ],
     "name": "initialize",
@@ -1333,6 +1336,25 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "depositId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isDepositExists",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "gameId",
         "type": "uint256"
       }
@@ -1343,6 +1365,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "liquidityManager",
+    "outputs": [
+      {
+        "internalType": "contract ILiquidityManager",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1830,22 +1865,23 @@
     "inputs": [
       {
         "internalType": "uint48",
-        "name": "depNum",
+        "name": "depositId",
         "type": "uint48"
       },
       {
         "internalType": "uint40",
         "name": "percent",
         "type": "uint40"
-      },
-      {
-        "internalType": "bool",
-        "name": "isNative",
-        "type": "bool"
       }
     ],
     "name": "withdrawLiquidity",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "withdrawnAmount",
+        "type": "uint128"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1860,15 +1896,16 @@
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "isNative",
-        "type": "bool"
       }
     ],
     "name": "withdrawPayout",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },

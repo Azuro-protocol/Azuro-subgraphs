@@ -21,6 +21,8 @@ export function handleTransfer(event: Transfer): void {
       event.transaction.index,
       event.logIndex,
       event.block,
+      event.transaction.gasPrice,
+      event.receipt !== null ? event.receipt!.gasUsed : null,
       'betId',
       event.params.tokenId.toString(),
     )

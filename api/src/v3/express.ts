@@ -7,10 +7,10 @@ import {
   LiquidityPoolContract,
   Outcome,
 } from '../../generated/schema'
-import { NewBet, Transfer } from '../../generated/templates/ExpressV2/ExpressV2'
+import { NewBet, Transfer } from '../../generated/templates/ExpressV3/ExpressV3'
 import { createBet, transferBet } from '../common/bets'
 import { createEvent } from '../common/events'
-import { BET_TYPE_EXPRESS, VERSION_V2 } from '../constants'
+import { BET_TYPE_EXPRESS, VERSION_V3 } from '../constants'
 import { getConditionEntityId, getOutcomeEntityId } from '../utils/schema'
 
 
@@ -69,7 +69,7 @@ export function handleNewBet(event: NewBet): void {
 
     // TODO remove later
     if (!conditionEntity) {
-      log.error('v2 handleNewBet express conditionEntity not found. conditionEntityId = {}', [conditionEntityId])
+      log.error('v3 handleNewBet express conditionEntity not found. conditionEntityId = {}', [conditionEntityId])
 
       return
     }
@@ -81,7 +81,7 @@ export function handleNewBet(event: NewBet): void {
 
     // TODO remove later
     if (!outcomeEntity) {
-      log.error('v2 handleNewBet express outcomeEntity not found. outcomeEntityId = {}', [outcomeEntityId])
+      log.error('v3 handleNewBet express outcomeEntity not found. outcomeEntityId = {}', [outcomeEntityId])
 
       return
     }
@@ -95,7 +95,7 @@ export function handleNewBet(event: NewBet): void {
   const liquidityPoolContractEntity = LiquidityPoolContract.load(lp)!
 
   createBet(
-    VERSION_V2,
+    VERSION_V3,
     BET_TYPE_EXPRESS.toString(),
     conditionEntities,
     outcomeEntities,
@@ -103,7 +103,7 @@ export function handleNewBet(event: NewBet): void {
     event.params.bet.odds,
     expressAddress,
     event.params.bettor,
-    event.params.bet.affiliate,
+    event.params.affiliate,
     event.params.betId,
     liquidityPoolContractEntity.tokenDecimals,
     event.params.bet.amount,

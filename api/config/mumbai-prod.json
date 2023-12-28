@@ -1,0 +1,12 @@
+
+{
+  "network": "mumbai",
+  "factoryv2": {
+    "address": "0x0CE975Db02edf2388607BB5C379Ee64253e2088d",
+    "startBlock": 42367075
+  },
+  "freebetFactoryv3": {
+    "address": "0xfc69b24121f90d132873c24802839176abc91f20",
+    "startBlock": 42909887
+  }
+}

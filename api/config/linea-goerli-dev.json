@@ -1,0 +1,11 @@
+{
+  "network": "polygon-zkevm-testnet",
+  "factoryv2": {
+    "address": "0xC11f8ad396A0464DFf77b3050A2724ba65e422D3",
+    "startBlock": 821632
+  },
+  "freebetFactoryv3": {
+    "address": "0x4024A4c2AC5dbDc969892832383021E286e678dc",
+    "startBlock": 1595266
+  }
+}

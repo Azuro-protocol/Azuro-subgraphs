@@ -10,7 +10,7 @@
     "address": "0xf0A93Ad0184cF1e5f29d7b5579358C99b9010F17",
     "startBlock": 24445885
   }],
-  "factoryv1": {
+  "factoryv2": {
     "address": "0x8EA1a7241537F10fa73363FDC6380F3FC8619c03",
     "startBlock": 26026402
   },
@@ -18,5 +18,9 @@
     "index": 1,
     "address": "0xB425E555492eE36c5A2918481EbbcF04AE73682b",
     "startBlock": 26027428
-  }]
+  }],
+  "freebetFactoryv3": {
+    "address": "0x00a7629689073BF8F343DE80FBbC34425131b3e5",
+    "startBlock": 30195226
+  }
 }

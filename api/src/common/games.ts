@@ -1,5 +1,5 @@
 import {
-  BigInt, ByteArray, Bytes, ethereum, JSONValueKind, log,
+  BigInt, ByteArray, Bytes, ethereum, json, JSONValue, JSONValueKind, log, TypedMap,
 } from '@graphprotocol/graph-ts'
 
 import {
@@ -8,71 +8,107 @@ import {
 import { DEFAULT_COUNTRY, GAME_STATUS_CANCELED, GAME_STATUS_CREATED } from '../constants'
 import { sportHubs } from '../dictionaties/sportHubs'
 import { sports } from '../dictionaties/sports'
+import { getImageUrl } from '../utils/images'
 import { getIPFSJson } from '../utils/ipfs'
-import { getGameEntityId, getParticipantEntityId } from '../utils/schema'
+import { getGameEntityId, getLeagueEntityId, getParticipantEntityId } from '../utils/schema'
 import { toSlug } from '../utils/text'
 
 
 export function createGame(
   liquidityPoolAddress: string,
   rawGameId: BigInt | null,
-  rawOracleGameId: BigInt | null,
-  ipfsHashBytes: Bytes,
+  ipfsHashBytes: Bytes | null,
+  dataBytes: Bytes | null,
   startsAt: BigInt,
+  network: string | null,
   txHash: string,
   createBlock: ethereum.Block,
 ): Game | null {
-  const ipfsHashHex = ipfsHashBytes.toHexString()
-  const bytesArr = ByteArray.fromHexString(`0x1220${ipfsHashHex.slice(2)}`)
-  const ipfsHash = bytesArr.toBase58()
 
-  const ipfsJson = getIPFSJson(ipfsHash)
+  let data: TypedMap<string, JSONValue> | null = null
 
-  if (!ipfsJson) {
-    log.error('createGame IPFS failed to get JSON. Hash: {}', [ipfsHash.toString()])
+  // V2
+  if (ipfsHashBytes !== null) {
+    const ipfsHashHex = ipfsHashBytes.toHexString()
+    const bytesArr = ByteArray.fromHexString(`0x1220${ipfsHashHex.slice(2)}`)
 
-    return null
+    const ipfsHash = bytesArr.toBase58()
+
+    const ipfsJson = getIPFSJson(ipfsHash)
+
+    if (!ipfsJson) {
+      log.error('createGame IPFS failed to get JSON. Hash: {}', [ipfsHash.toString()])
+
+      return null
+    }
+
+    data = ipfsJson.toObject()
+
+    if (data === null) {
+      log.error('createGame IPFS failed to convert to object. Hash: {}', [ipfsHash.toString()])
+
+      return null
+    }
+
   }
 
-  const ipfsData = ipfsJson.toObject()
+  // V3
 
-  if (!ipfsData) {
-    log.error('createGame IPFS failed to convert to object. Hash: {}', [ipfsHash.toString()])
+  if (dataBytes !== null) {
 
-    return null
+    const dataJson = json.try_fromBytes(dataBytes)
+
+    if (!dataJson.isOk) {
+      log.error('createGame bytes data failed to parse json. data: {}', [dataBytes.toString()])
+
+      return null
+    }
+
+    data = dataJson.value.toObject()
+
+    if (data === null) {
+      log.error('createGame bytes data failed to convert to object. data: {}', [dataBytes.toString()])
+
+      return null
+    }
+
   }
+
+  data = data!
 
   let sportId: BigInt | null = null
 
   // V1
-  const sportTypeIdField = ipfsData.get('sportTypeId')
+  const sportTypeIdField = data.get('sportTypeId')
 
   if (sportTypeIdField && sportTypeIdField.kind === JSONValueKind.NUMBER) {
     sportId = sportTypeIdField.toBigInt()
   }
 
   // V2
-  const sportIdField = ipfsData.get('sportId')
+  const sportIdField = data.get('sportId')
 
   if (sportIdField && sportIdField.kind === JSONValueKind.NUMBER) {
     sportId = sportIdField.toBigInt()
   }
 
   if (sportId === null) {
+    log.error('createGame sportId is null', [])
+
     return null
   }
 
   let countryName = DEFAULT_COUNTRY.toString()
 
   // V1
-  const titleCountryField = ipfsData.get('titleCountry')
+  const titleCountryField = data.get('titleCountry')
 
   if (titleCountryField && titleCountryField.kind === JSONValueKind.STRING) {
     countryName = titleCountryField.toString()
   }
 
   // V2
-  const countryObjectField = ipfsData.get('country')
+  const countryObjectField = data.get('country')
 
   if (countryObjectField && countryObjectField.kind === JSONValueKind.OBJECT) {
     const countryObject = countryObjectField.toObject()
@@ -87,14 +123,14 @@ export function createGame(
   let leagueName: string | null = null
 
   // V1
-  const titleLeagueField = ipfsData.get('titleLeague')
+  const titleLeagueField = data.get('titleLeague')
 
   if (titleLeagueField && titleLeagueField.kind === JSONValueKind.STRING) {
     leagueName = titleLeagueField.toString()
   }
 
   // V2
-  const leagueObjectField = ipfsData.get('league')
+  const leagueObjectField = data.get('league')
 
   if (leagueObjectField && leagueObjectField.kind === JSONValueKind.OBJECT) {
     const leagueObject = leagueObjectField.toObject()
@@ -107,12 +143,16 @@ export function createGame(
   }
 
   if (leagueName === null) {
+    log.error('createGame leagueName is null', [])
+
     return null
   }
 
   const sportHubName = sportHubs.get(sportId)
 
   if (!sportHubName) {
+    log.error('createGame sportHubName is null', [])
+
     return null
   }
 
@@ -132,6 +172,8 @@ export function createGame(
     const sportName = sports.get(sportId)
 
     if (!sportName) {
+      log.error('createGame sportName is null', [])
+
       return null
     }
     sportEntity.sportId = sportId
@@ -157,7 +199,7 @@ export function createGame(
     countryEntity.save()
   }
 
-  let leagueEntityId = countryName.concat('_').concat(leagueName)
+  let leagueEntityId = getLeagueEntityId(sportId, countryName, leagueName)
 
   let leagueEntity = League.load(leagueEntityId)
 
@@ -176,9 +218,11 @@ export function createGame(
   let gameId = rawGameId
 
   if (gameId === null) {
-    const gameIdObjectField = ipfsData.get('gameId')
+    const gameIdObjectField = data.get('gameId')
 
     if (!gameIdObjectField || gameIdObjectField.kind !== JSONValueKind.NUMBER) {
+      log.error('createGame gameIdObjectField is null', [])
+
       return null
     }
 
@@ -187,7 +231,7 @@ export function createGame(
   // end V1 - gameId from ipfs
 
   // V2
-  const extraObjectField = ipfsData.get('extra')
+  const extraObjectField = data.get('extra')
   let provider = BigInt.fromString('1')
 
   if (extraObjectField && extraObjectField.kind === JSONValueKind.OBJECT) {
@@ -220,7 +264,6 @@ export function createGame(
     gameEntity.league = leagueEntity.id
     gameEntity.startsAt = startsAt
     gameEntity.sport = sportEntity.id
-    gameEntity.ipfsHash = ipfsHash
 
     gameEntity.createdTxHash = txHash
 
@@ -240,17 +283,17 @@ export function createGame(
     let participantEntityId = getParticipantEntityId(gameEntity.id, BigInt.fromI32(i).toString())
 
     let participantNameKey = 'entity'.concat((i + 1).toString()).concat('Name')
-    let participantNameValue = ipfsData.get(participantNameKey)
+    let participantNameValue = data.get(participantNameKey)
 
     if (!participantNameValue) {
       continue
     }
     const participantName = participantNameValue.toString()
 
-    participantsNames.push(participantName)
+    participantsNames = participantsNames.concat([participantName])
 
     let participantImageKey = 'entity'.concat((i + 1).toString()).concat('Image')
-    let participantImageValue = ipfsData.get(participantImageKey)
+    let participantImageValue = data.get(participantImageKey)
     const participantImage = participantImageValue && participantImageValue.kind === JSONValueKind.STRING
       ? participantImageValue.toString()
       : null
@@ -268,7 +311,7 @@ export function createGame(
   }
 
   // V2
-  let participants = ipfsData.get('participants')
+  let participants = data.get('participants')
 
   if (participants && participants.kind === JSONValueKind.ARRAY) {
     const participantsArray = participants.toArray()
@@ -285,12 +328,12 @@ export function createGame(
       }
 
       const participantName = participantNameValue.toString()
-      participantsNames.push(participantName)
+      participantsNames = participantsNames.concat([participantName])
 
       const participantImageValue = mappedParticipant.get('image')
       const participantImage = participantImageValue && participantImageValue.kind === JSONValueKind.STRING
         ? participantImageValue.toString()
-        : null
+        : getImageUrl(network, sportId, gameId, participantName)
 
       const participantEntity = new Participant(participantEntityId)
       participantEntity.game = gameEntity.id

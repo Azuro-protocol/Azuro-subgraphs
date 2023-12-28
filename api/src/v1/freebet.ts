@@ -10,15 +10,18 @@ import {
   Transfer,
 } from '../../generated/FreebetV1_1/FreebetV1'
 import { Bet, FreebetContract, LiquidityPoolContract } from '../../generated/schema'
+import { linkBetWithFreeBet } from '../common/bets'
 import { createEvent } from '../common/events'
 import {
   createFreebet,
-  createFreebetContract,
+  createFreebetContractEntity,
   redeemFreebet,
   reissueFreebet,
+  resolveFreebet,
   transferFreebet,
   withdrawFreebet,
 } from '../common/freebets'
+import { VERSION_V1 } from '../constants'
 import { getBetEntityId } from '../utils/schema'
 
 
@@ -47,7 +50,7 @@ function getOrCreateFreebetContract(freebetContractAddress: Address): FreebetCon
     return null
   }
 
-  return createFreebetContract(freebetContractAddress.toHexString(), lp.value.toHexString(), name.value.toString())
+  return createFreebetContractEntity(freebetContractAddress.toHexString(), lp.value.toHexString(), name.value.toString(), null, null)
 }
 
 export function handleFreeBetMinted(event: FreeBetMinted): void {
@@ -58,6 +61,8 @@ export function handleFreeBetMinted(event: FreeBetMinted): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'freebetId',
     event.params.id.toString(),
   )
@@ -66,10 +71,11 @@ export function handleFreeBetMinted(event: FreeBetMinted): void {
   const liquidityPoolContractEntity = LiquidityPoolContract.load(freebetContractEntity.liquidityPool)!
 
   createFreebet(
-    false,
+    VERSION_V1,
     freebetContractEntity.id,
     event.address.toHexString(),
     freebetContractEntity.name,
+    null,
     event.params.id,
     event.params.receiver.toHexString(),
     event.params.bet.amount,
@@ -77,6 +83,8 @@ export function handleFreeBetMinted(event: FreeBetMinted): void {
     event.params.bet.minOdds,
     event.params.bet.durationTime,
     event.transaction.hash.toHexString(),
+    null,
+    null,
     event.block,
   )
 }
@@ -96,15 +104,18 @@ export function handleFreeBetMintedBatch(event: FreeBetMintedBatch): void {
       event.transaction.index,
       fakeLogIndex,
       event.block,
+      event.transaction.gasPrice,
+      event.receipt !== null ? event.receipt!.gasUsed : null,
       'freebetId',
       event.params.ids[i].toString(),
     )
 
     createFreebet(
-      false,
+      VERSION_V1,
       freebetContractEntity.id,
       event.address.toHexString(),
       freebetContractEntity.name,
+      null,
       event.params.ids[i],
       event.params.receivers[i].toHexString(),
       event.params.bets[i].amount,
@@ -112,6 +123,8 @@ export function handleFreeBetMintedBatch(event: FreeBetMintedBatch): void {
       event.params.bets[i].minOdds,
       event.params.bets[i].durationTime,
       event.transaction.hash.toHexString(),
+      null,
+      null,
       event.block,
     )
   }
@@ -125,6 +138,8 @@ export function handleFreeBetReissued(event: FreeBetReissued): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'freebetId',
     event.params.id.toString(),
   )
@@ -140,6 +155,8 @@ export function handleFreeBetRedeemed(event: FreeBetRedeemed): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'freebetId',
     event.params.id.toString(),
   )
@@ -163,22 +180,15 @@ export function handleFreeBetRedeemed(event: FreeBetRedeemed): void {
     return
   }
 
-  const betEntityId = getBetEntityId(freebetEntity.core!, event.params.azuroBetId.toString())
-  const betEntity = Bet.load(betEntityId)
 
-  if (!betEntity) {
-    log.error('v1 handleFreeBetRedeemed betEntity not found. betEntity = {}', [betEntityId])
+  linkBetWithFreeBet(
+    coreAddress,
+    event.params.azuroBetId,
+    freebetEntity.id,
+    freebetEntity.owner,
+    event.block,
+  )
 
-    return
-  }
-
-  betEntity.freebet = freebetEntity.id
-  betEntity._isFreebet = true
-  betEntity.bettor = freebetEntity.owner
-  betEntity.actor = freebetEntity.owner
-  betEntity._updatedAt = event.block.timestamp
-
-  betEntity.save()
 }
 
 export function handleBettorWin(event: BettorWin): void {
@@ -212,21 +222,37 @@ export function handleBettorWin(event: BettorWin): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'freebetId',
     freebetEntity.freebetId.toString(),
   )
 }
 
 export function handleTransfer(event: Transfer): void {
-  const freebetEntity = transferFreebet(
-    event.address.toHexString(),
-    event.params.tokenId,
-    event.params.from,
-    event.params.to,
-    event.block,
-  )
+  // create nft
+  if (event.params.from.equals(Address.zero())) {
+    return
+  }
 
-  if (freebetEntity) {
+  // burn nft
+  if (event.params.to.equals(Address.zero())) {
+    resolveFreebet(
+      event.address.toHexString(),
+      event.params.tokenId,
+      true,
+      event.block,
+    )
+  }
+  // real transfer
+  else {
+    transferFreebet(
+      event.address.toHexString(),
+      event.params.tokenId,
+      event.params.to,
+      event.block,
+    )
+
     createEvent(
       'FreeBetTransfer',
       event.address,
@@ -234,6 +260,8 @@ export function handleTransfer(event: Transfer): void {
       event.transaction.index,
       event.logIndex,
       event.block,
+      event.transaction.gasPrice,
+      event.receipt !== null ? event.receipt!.gasUsed : null,
       'freebetId',
       event.params.tokenId.toString(),
     )

@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.7
 schema:
   file: ./schema.graphql
 features:
@@ -15,7 +15,7 @@ dataSources:
       startBlock: {{ corev1.startBlock }}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -54,7 +54,7 @@ dataSources:
       startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -81,18 +81,18 @@ dataSources:
           handler: handleTransfer
       file: ./src/v1/freebet.ts
   {{/freebetsv1}}
-  {{#factoryv1}}
   # V2
+  {{#factoryv2}}
   - kind: ethereum
-    name: FactoryV1
+    name: FactoryV2
     network: {{ network }}
     source:
-      abi: FactoryV1
-      address: "{{ factoryv1.address }}"
-      startBlock: {{ factoryv1.startBlock }}
+      abi: FactoryV2
+      address: "{{ factoryv2.address }}"
+      startBlock: {{ factoryv2.startBlock }}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -102,23 +102,29 @@ dataSources:
         - Game
         - Condition
       abis:
-        - name: FactoryV1
-          file: ./abis/FactoryV1.json
+        - name: FactoryV2
+          file: ./abis/FactoryV2.json
         - name: CoreV2
           file: ./abis/CoreV2.json
+        - name: CoreV3
+          file: ./abis/CoreV3.json
         - name: LPV2
           file: ./abis/LPV2.json
         - name: ERC20
           file: ./abis/ERC20.json
-        - name: ExpressV1
-          file: ./abis/BetExpressV1.json
+        - name: ExpressV2
+          file: ./abis/BetExpressV2.json
+        - name: ExpressV3
+          file: ./abis/BetExpressV3.json
+        - name: LiveCoreV1
+          file: ./abis/LiveCoreV1.json
       eventHandlers:
         - event: NewPool(indexed address,indexed address,indexed string,address)
           handler: handleNewPool
         - event: NewCore(indexed address,indexed address,indexed string)
           handler: handleNewCore
       file: ./src/v2/factory.ts
-  {{/factoryv1}}
+  {{/factoryv2}}
 
   {{#freebetsv2}}
   - kind: ethereum
@@ -130,7 +136,7 @@ dataSources:
       startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -157,6 +163,35 @@ dataSources:
           handler: handleTransfer
       file: ./src/v2/freebet.ts
   {{/freebetsv2}}
+
+  {{#freebetFactoryv3}}
+  - kind: ethereum
+    name: FreebetFactoryV3
+    network: {{ network }}
+    source:
+      abi: FreebetFactoryV3
+      address: "{{ freebetFactoryv3.address }}"
+      startBlock: {{ freebetFactoryv3.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SportHub
+        - Sport
+        - Country
+        - League
+        - Game
+        - Condition
+      abis:
+        - name: FreebetFactoryV3
+          file: ./abis/FreebetFactoryV3.json
+      eventHandlers:
+        - event: NewFreeBet(indexed address,indexed address,address,address)
+          handler: handleNewFreebet
+      file: ./src/v3/freebetFactory.ts
+  {{/freebetFactoryv3}}
+
 templates:
   # V1
   - kind: ethereum
@@ -166,7 +201,7 @@ templates:
       abi: LPV1
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -185,8 +220,10 @@ templates:
       eventHandlers:
         - event: BetterWin(indexed address,uint256,uint256)
           handler: handleBetterWin
+          # receipt: true
         - event: NewBet(indexed address,indexed uint256,indexed uint256,uint64,uint128,uint256,uint128,uint128)
           handler: handleNewBet
+          # receipt: true
         - event: LiquidityAdded(indexed address,uint256,uint48)
           handler: handleLiquidityAdded
         - event: LiquidityRemoved(indexed address,uint256)
@@ -206,7 +243,7 @@ templates:
       abi: AzuroBetV1
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -231,7 +268,7 @@ templates:
       abi: LPV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -247,11 +284,14 @@ templates:
           file: ./abis/ERC20.json
       eventHandlers:
         - event: NewGame(indexed uint256,bytes32,uint64)
-          handler: handleNewGame
+          handler: handleNewGameV2
+        - event: NewGame(indexed uint256,uint64,bytes)
+          handler: handleNewGameV3
         - event: GameShifted(indexed uint256,uint64)
           handler: handleGameShifted
         - event: BettorWin(indexed address,indexed address,uint256,uint256)
           handler: handleBettorWin
+          # receipt: true
         - event: GameCanceled(indexed uint256)
           handler: handleGameCanceled
         - event: LiquidityAdded(indexed address,indexed uint48,uint256)
@@ -262,6 +302,8 @@ templates:
           handler: handleTransfer
         - event: WithdrawTimeoutChanged(uint64)
           handler: handleWithdrawTimeoutChanged
+        - event: LiquidityManagerChanged(address)
+          handler: handleManagerChanged
       file: ./src/v2/lp.ts
 
   - kind: ethereum
@@ -271,7 +313,7 @@ templates:
       abi: CoreV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -285,8 +327,8 @@ templates:
           file: ./abis/CoreV2.json
         - name: ERC20
           file: ./abis/ERC20.json
-        - name: ExpressV1
-          file: ./abis/BetExpressV1.json
+        - name: ExpressV2
+          file: ./abis/BetExpressV2.json
       eventHandlers:
         - event: ConditionCreated(indexed uint256,indexed uint256)
           handler: handleConditionCreated
@@ -296,34 +338,37 @@ templates:
           handler: handleConditionStopped
         - event: NewBet(indexed address,indexed address,indexed uint256,uint256,uint64,uint128,uint64,uint128[2])
           handler: handleNewBet
+          # receipt: true
         - event: OddsChanged(indexed uint256,uint64[2])
           handler: handleOddsChanged
       file: ./src/v2/core.ts
 
   - kind: ethereum
-    name: ExpressV1
+    name: ExpressV2
     network: {{ network }}
     source:
-      abi: ExpressV1
+      abi: ExpressV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Condition
         - Outcome
         - ExpressBet
       abis:
-        - name: ExpressV1
-          file: ./abis/BetExpressV1.json
+        - name: ExpressV2
+          file: ./abis/BetExpressV2.json
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
         - event: NewBet(indexed address,indexed uint256,(address,uint64,uint128,uint48,bool,(uint256,uint64)[],uint64[]))
           handler: handleNewBet
+          # receipt: true
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
       file: ./src/v2/express.ts
+
 
   - kind: ethereum
     name: AzuroBetV2
@@ -332,7 +377,7 @@ templates:
       abi: AzuroBetV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SportHub
@@ -348,3 +393,128 @@ templates:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
       file: ./src/v2/azurobet.ts
+
+  - kind: ethereum
+    name: CoreV3
+    network: {{ network }}
+    source:
+      abi: CoreV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SportHub
+        - Sport
+        - Country
+        - League
+        - Game
+        - Condition
+      abis:
+        - name: CoreV3
+          file: ./abis/CoreV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ExpressV3
+          file: ./abis/BetExpressV3.json
+      eventHandlers:
+        - event: ConditionCreated(indexed uint256,indexed uint256,uint64[])
+          handler: handleConditionCreated
+        - event: ConditionResolved(indexed uint256,uint8,uint64[],int128)
+          handler: handleConditionResolved
+        - event: ConditionStopped(indexed uint256,bool)
+          handler: handleConditionStopped
+        - event: NewBet(indexed address,indexed address,indexed uint256,uint256,uint64,uint128,uint256,uint128[])
+          handler: handleNewBet
+          # receipt: true
+        - event: OddsChanged(indexed uint256,uint256[])
+          handler: handleOddsChanged
+        - event: MarginChanged(indexed uint256,uint64)
+          handler: handleMarginChanged
+        - event: ReinforcementChanged(indexed uint256,uint128)
+          handler: handleReinforcementChanged
+      file: ./src/v3/core.ts
+
+  - kind: ethereum
+    name: ExpressV3
+    network: {{ network }}
+    source:
+      abi: ExpressV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Condition
+        - Outcome
+        - ExpressBet
+      abis:
+        - name: ExpressV3
+          file: ./abis/BetExpressV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: NewBet(indexed address,indexed address,indexed uint256,(uint64,uint128,uint48,bool,(uint256,uint64)[],uint64[]))
+          handler: handleNewBet
+          # receipt: true
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/v3/express.ts
+
+  - kind: ethereum
+    name: FreebetV3
+    network: {{ network }}
+    source:
+      abi: FreebetV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SportHub
+        - Sport
+        - Country
+        - League
+        - Game
+        - Condition
+      abis:
+        - name: FreebetV3
+          file: ./abis/FreebetV3.json
+      eventHandlers:
+        - event: NewBet(indexed uint256,address,indexed address,indexed uint256,uint128,uint64,uint64)
+          handler: handleNewBet
+        - event: BettorWin(indexed address,indexed address,indexed uint256,uint256)
+          handler: handleBettorWin
+        - event: PayoutsResolved(uint256[])
+          handler: handlePayoutsResolved
+      file: ./src/v3/freebet.ts
+
+  - kind: ethereum
+    name: LiveCoreV1
+    network: {{ network }}
+    source:
+      abi: LiveCoreV1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SportHub
+        - Sport
+        - Country
+        - League
+        - Game
+        - LiveCondition
+      abis:
+        - name: LiveCoreV1
+          file: ./abis/LiveCoreV1.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: ConditionCreated(indexed uint256,indexed uint256,uint64[],uint256[],uint8)
+          handler: handleLiveConditionCreated
+        - event: ConditionResolved(indexed uint256,uint8,uint64[],int128,uint64)
+          handler: handleLiveConditionResolved
+        - event: NewLiveBet(indexed address,indexed address,indexed uint256,uint256,uint64,uint128,uint64,uint128)
+          handler: handleNewLiveBet
+      file: ./src/livecore/livecore.ts

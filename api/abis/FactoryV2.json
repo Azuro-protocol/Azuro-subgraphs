@@ -208,11 +208,6 @@
         "type": "uint64"
       },
       {
-        "internalType": "uint64",
-        "name": "affiliateFee",
-        "type": "uint64"
-      },
-      {
         "internalType": "string",
         "name": "coreType",
         "type": "string"

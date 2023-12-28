@@ -1,8 +1,12 @@
 
 {
   "network": "arbitrum-goerli",
-  "factoryv1": {
+  "factoryv2": {
     "address": "0x93bAE63c973972b3f1037E0dBF9301c5023c9F67",
     "startBlock": 22870543
+  },
+  "freebetFactoryv3": {
+    "address": "0x14A148B7F315645066E964e5e5aB4B954AE78119",
+    "startBlock": 43790726
   }
 }

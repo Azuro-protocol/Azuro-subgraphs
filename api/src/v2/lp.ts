@@ -1,24 +1,28 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts'
 
 import {
   BettorWin,
   GameCanceled,
   GameShifted,
   LiquidityAdded,
+  LiquidityManagerChanged,
   LiquidityRemoved,
   LPV2 as LPAbi,
-  NewGame,
+  NewGame as NewGameV3,
+  NewGame1 as NewGameV2,
   Transfer,
   WithdrawTimeoutChanged,
 } from '../../generated/templates/LPV2/LPV2'
 import { bettorWin } from '../common/bets'
 import { createEvent } from '../common/events'
 import { cancelGame, createGame, shiftGame } from '../common/games'
-import { changeWithdrawalTimeout, depositLiquidity, transferLiquidity, withdrawLiquidity } from '../common/pool'
+import {
+  changeWithdrawalTimeout, depositLiquidity, transferLiquidity, updateLiquidityManager, withdrawLiquidity,
+} from '../common/pool'
 import { getGameEntityId } from '../utils/schema'
 
 
-export function handleNewGame(event: NewGame): void {
+export function handleNewGameV2(event: NewGameV2): void {
   createEvent(
     'NewGame',
     event.address,
@@ -26,16 +30,49 @@ export function handleNewGame(event: NewGame): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'gameId',
     event.params.gameId.toString(),
   )
 
+  const network = dataSource.network()
+
   createGame(
     event.address.toHexString(),
     event.params.gameId,
-    event.params.gameId,
     event.params.ipfsHash,
+    null,
     event.params.startsAt,
+    network,
+    event.transaction.hash.toHexString(),
+    event.block,
+  )
+}
+
+export function handleNewGameV3(event: NewGameV3): void {
+  createEvent(
+    'NewGame',
+    event.address,
+    event.transaction.hash.toHexString(),
+    event.transaction.index,
+    event.logIndex,
+    event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'gameId',
+    event.params.gameId.toString(),
+  )
+
+  const network = dataSource.network()
+
+  createGame(
+    event.address.toHexString(),
+    event.params.gameId,
+    null,
+    event.params.data,
+    event.params.startsAt,
+    network,
     event.transaction.hash.toHexString(),
     event.block,
   )
@@ -49,6 +86,8 @@ export function handleGameShifted(event: GameShifted): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'gameId',
     event.params.gameId.toString(),
   )
@@ -66,6 +105,8 @@ export function handleGameCanceled(event: GameCanceled): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'gameId',
     event.params.gameId.toString(),
   )
@@ -83,6 +124,8 @@ export function handleBettorWin(event: BettorWin): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'betId',
     event.params.tokenId.toString(),
   )
@@ -100,14 +143,16 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
-    event.params.leaf.toString(),
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
+    event.params.depositId.toString(),
   )
 
   depositLiquidity(
     event.address.toHexString(),
     event.params.amount,
-    event.params.leaf,
+    event.params.depositId,
     event.params.account.toHexString(),
     event.block,
     event.transaction,
@@ -122,14 +167,16 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
-    event.params.leaf.toString(),
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
+    event.params.depositId.toString(),
   )
 
   let isFullyWithdrawn = false
 
   const liquidityPoolSC = LPAbi.bind(event.address)
-  const nodeWithdrawView = liquidityPoolSC.try_nodeWithdrawView(event.params.leaf)
+  const nodeWithdrawView = liquidityPoolSC.try_nodeWithdrawView(event.params.depositId)
 
   if (!nodeWithdrawView.reverted && nodeWithdrawView.value.equals(BigInt.zero())) {
     isFullyWithdrawn = true
@@ -138,7 +185,7 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   withdrawLiquidity(
     event.address.toHexString(),
     event.params.amount,
-    event.params.leaf,
+    event.params.depositId,
     event.params.account.toHexString(),
     isFullyWithdrawn,
     event.block,
@@ -158,7 +205,9 @@ export function handleTransfer(event: Transfer): void {
     event.transaction.index,
     event.logIndex,
     event.block,
-    'leafId',
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
+    'depositId',
     event.params.tokenId.toString(),
   )
 
@@ -167,4 +216,18 @@ export function handleTransfer(event: Transfer): void {
 
 export function handleWithdrawTimeoutChanged(event: WithdrawTimeoutChanged): void {
   changeWithdrawalTimeout(event.address.toHexString(), event.params.newWithdrawTimeout)
+}
+
+export function handleManagerChanged(event: LiquidityManagerChanged): void {
+
+  let newAddress: string | null = null
+
+  if (event.params.newLiquidityManager.notEqual(Address.zero())) {
+    newAddress = event.params.newLiquidityManager.toHexString()
+  }
+
+  updateLiquidityManager(
+    event.address.toHexString(),
+    newAddress,
+  )
 }

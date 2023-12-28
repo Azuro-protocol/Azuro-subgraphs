@@ -1,7 +1,7 @@
 
 {
   "network": "matic",
-  "factoryv1": {
+  "factoryv2": {
     "address": "0xDe3E9A39aF548b5daA8365D30A5F6E7a7fA0203d",
     "startBlock": 38563568
   },
@@ -9,5 +9,9 @@
     "index": 1,
     "address": "0x3df16FB8Dc28F63565AF2815E04a3368360FFd23",
     "startBlock": 38581027
-  }]
+  }],
+  "freebetFactoryv3": {
+    "address": "0x91A8a8179263E6d3609302FcF65A149344085a6E",
+    "startBlock": 48092112
+  }
 }

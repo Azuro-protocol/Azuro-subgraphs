@@ -1,24 +1,25 @@
 import { log } from '@graphprotocol/graph-ts'
 
-import { NewCore, NewPool } from '../../generated/FactoryV1/FactoryV1'
+import { NewCore, NewPool } from '../../generated/FactoryV2/FactoryV2'
 import { CoreContract, LiquidityPoolContract } from '../../generated/schema'
-import { LPV2 as LP } from '../../generated/templates'
-import { LPV2 as LPAbi } from '../../generated/templates/LPV2/LPV2'
+import { LPV2 } from '../../generated/templates'
+import { LPV2 as LPAbiV2 } from '../../generated/templates/LPV2/LPV2'
 import {
   connectCore,
   createCoreEntity,
   createExpressPrematchRelationEntity,
-  getPrematchAddressByExpressAddress,
+  getPrematchAddressByExpressAddressV2,
+  getPrematchAddressByExpressAddressV3,
 } from '../common/factory'
 import { createPoolEntity } from '../common/pool'
-import { CORE_TYPE_EXPRESS, CORE_TYPES } from '../constants'
-import { EXPRESS_WHITELIST, LP_V2_WHITELIST } from '../whitelists'
+import { CORE_TYPE_EXPRESS, CORE_TYPE_EXPRESS_V2, CORE_TYPES, VERSION_V2 } from '../constants'
+import { LP_WHITELIST } from '../whitelists'
 
 
 export function handleNewPool(event: NewPool): void {
   const liquidityPoolAddress = event.params.lp.toHexString()
 
-  if (LP_V2_WHITELIST.indexOf(liquidityPoolAddress) === -1) {
+  if (LP_WHITELIST.indexOf(liquidityPoolAddress) === -1) {
     log.warning('v2 handleNewPool skip {} because it isn\'t whitelisted', [liquidityPoolAddress])
 
     return
@@ -32,7 +33,7 @@ export function handleNewPool(event: NewPool): void {
     return
   }
 
-  const liquidityPoolSC = LPAbi.bind(event.params.lp)
+  const liquidityPoolSC = LPAbiV2.bind(event.params.lp)
 
   const token = liquidityPoolSC.try_token()
 
@@ -41,14 +42,14 @@ export function handleNewPool(event: NewPool): void {
   }
 
   const liquidityPoolContractEntity = createPoolEntity(
-    true,
+    VERSION_V2,
     coreAddress,
     liquidityPoolAddress,
     token.value.toHexString(),
     event.block,
   )
 
-  LP.create(event.params.lp)
+  LPV2.create(event.params.lp)
 
   let coreContractEntity = CoreContract.load(coreAddress)
 
@@ -58,7 +59,7 @@ export function handleNewPool(event: NewPool): void {
   }
 
   if (coreType === CORE_TYPE_EXPRESS) {
-    const prematchAddress = getPrematchAddressByExpressAddress(coreAddress)
+    const prematchAddress = getPrematchAddressByExpressAddressV2(coreAddress)
 
     if (prematchAddress !== null) {
       createExpressPrematchRelationEntity(coreAddress, prematchAddress)
@@ -69,7 +70,7 @@ export function handleNewPool(event: NewPool): void {
 export function handleNewCore(event: NewCore): void {
   const liquidityPoolAddress = event.params.lp.toHexString()
 
-  if (LP_V2_WHITELIST.indexOf(liquidityPoolAddress) === -1) {
+  if (LP_WHITELIST.indexOf(liquidityPoolAddress) === -1) {
     log.warning('v2 handleNewPool skip {} because it isn\'t whitelisted', [liquidityPoolAddress])
 
     return
@@ -80,12 +81,6 @@ export function handleNewCore(event: NewCore): void {
   const coreType = CORE_TYPES.get(event.params.coreType)
 
   if (coreType === null) {
-    return
-  }
-
-  if (coreType === CORE_TYPE_EXPRESS && EXPRESS_WHITELIST.indexOf(coreAddress) === -1) {
-    log.warning('v2 handleNewCore skip {} because it isn\'t whitelisted', [coreAddress])
-
     return
   }
 
@@ -98,11 +93,16 @@ export function handleNewCore(event: NewCore): void {
     connectCore(event.params.core.toHexString(), coreType)
   }
 
-  if (coreType === CORE_TYPE_EXPRESS) {
-    const prematchAddress = getPrematchAddressByExpressAddress(coreAddress)
+  let prematchAddress: string | null = null
 
-    if (prematchAddress !== null) {
-      createExpressPrematchRelationEntity(coreAddress, prematchAddress)
-    }
+  if (coreType === CORE_TYPE_EXPRESS) {
+    prematchAddress = getPrematchAddressByExpressAddressV2(coreAddress)
+  }
+  else if (coreType === CORE_TYPE_EXPRESS_V2) {
+    prematchAddress = getPrematchAddressByExpressAddressV3(coreAddress)
+  }
+
+  if (prematchAddress !== null) {
+    createExpressPrematchRelationEntity(coreAddress, prematchAddress)
   }
 }

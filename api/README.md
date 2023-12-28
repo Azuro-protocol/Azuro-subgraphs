@@ -1,20 +1,23 @@
 # Azuro-api
 
-This directory contains the Azuro API subgraph, which provides endpoints for accessing data on different networks. The API is compatible with various networks, including Arbitrum, Gnosis, and Polygon. You can find the endpoints for both production and development environments below.
+This directory contains the Azuro API subgraph, which provides endpoints for accessing data on different networks. The API is compatible with various networks, including Arbitrum, Gnosis, Polygon and Linea. You can find the endpoints for both production and development environments below.
 
 ## Endpoints
 
 ### Production
 
-- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v2>
-- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v2>
-- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v2>
+- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-v3>
+- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-polygon-v3>
+- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-one-v3>
+- Linea: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-linea-v3>
+- Polygon Mumbai (AZUSD): <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-v3>
 
 ### Development
 
-- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-goerli-dev-v2>
-- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-dev-v2>
-- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-dev-v2>
+- Gnosis: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-gnosis-dev-v3>
+- Polygon: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-mumbai-dev-v3>
+- Arbitrum: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-arbitrum-goerli-dev-v3>
+- Linea: <https://thegraph.azuro.org/subgraphs/name/azuro-protocol/azuro-api-linea-goerli-dev-v3>
 
 ## Running You Own Subgraph
 

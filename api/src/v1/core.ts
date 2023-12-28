@@ -17,7 +17,7 @@ import { createEvent } from '../common/events'
 import { createCoreEntity } from '../common/factory'
 import { createGame, shiftGame } from '../common/games'
 import { createPoolEntity } from '../common/pool'
-import { CORE_TYPE_PRE_MATCH } from '../constants'
+import { CORE_TYPE_PRE_MATCH, VERSION_V1 } from '../constants'
 import { getConditionEntityId } from '../utils/schema'
 
 
@@ -36,7 +36,7 @@ export function handleLpChanged(event: LpChanged): void {
   }
 
   const liquidityPoolContractEntity = createPoolEntity(
-    false,
+    VERSION_V1,
     coreAddress,
     liquidityPoolAddress,
     token.value.toHexString(),
@@ -72,6 +72,8 @@ export function handleConditionCreated(event: ConditionCreated): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'conditionId',
     event.params.conditionId.toString(),
   )
@@ -105,9 +107,10 @@ export function handleConditionCreated(event: ConditionCreated): void {
   const gameEntity = createGame(
     liquidityPoolAddress,
     null,
-    null,
     conditionData.value.ipfsHash,
+    null,
     startsAt,
+    null,
     event.transaction.hash.toHexString(),
     event.block,
   )
@@ -120,7 +123,7 @@ export function handleConditionCreated(event: ConditionCreated): void {
   }
 
   createCondition(
-    false,
+    VERSION_V1,
     coreAddress,
     conditionId,
     gameEntity.id,
@@ -128,6 +131,8 @@ export function handleConditionCreated(event: ConditionCreated): void {
     conditionData.value.reinforcement,
     conditionData.value.outcomes,
     conditionData.value.fundBank,
+    1,
+    false,
     gameEntity.provider,
     event.transaction.hash.toHexString(),
     event.block,
@@ -143,6 +148,8 @@ export function handleConditionResolved(event: ConditionResolved): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'conditionId',
     event.params.conditionId.toString(),
   )
@@ -163,11 +170,11 @@ export function handleConditionResolved(event: ConditionResolved): void {
   const liquidityPoolAddress = CoreContract.load(coreAddress)!.liquidityPool
 
   resolveCondition(
+    VERSION_V1,
     liquidityPoolAddress,
     conditionEntity,
-    event.params.outcomeWin,
-    event.transaction.hash.toHexString(),
-    event.block,
+    [event.params.outcomeWin],
+    event,
   )
 }
 
@@ -179,6 +186,8 @@ export function handleConditionStopped(event: ConditionStopped): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'conditionId',
     event.params.conditionId.toString(),
   )
@@ -207,6 +216,8 @@ export function handleConditionShifted(event: ConditionShifted): void {
     event.transaction.index,
     event.logIndex,
     event.block,
+    event.transaction.gasPrice,
+    event.receipt !== null ? event.receipt!.gasUsed : null,
     'conditionId',
     event.params.conditionId.toString(),
   )

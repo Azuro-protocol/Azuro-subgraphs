@@ -7,3 +7,5 @@ subgraph.yaml
 .vscode
 .DS_Store
 
+*.wasm
+**/tests/*.json
